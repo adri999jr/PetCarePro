@@ -4,14 +4,23 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import demo.PetCarePro.persistence.entities.Veterinario;
 import demo.PetCarePro.persistence.repositories.VeterinarioRepository;
+import demo.PetCarePro.persistence.security.JwtUtils;
+import demo.PetCarePro.services.dto.LoginRequestDTO;
+import demo.PetCarePro.services.dto.LoginResponseDTO;
 @Service
 public class VeterinarioService {
 	@Autowired
     private VeterinarioRepository veterinarioRepository;
+	@Autowired
+	private JwtUtils jwtUtils;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     
     // Devuelve la lista de todos los veterinarios
     public List<Veterinario> findAll() {
@@ -23,10 +32,7 @@ public class VeterinarioService {
         return this.veterinarioRepository.existsById(idVeterinario);
     }
     
-    // Devuelve la entidad Veterinario envuelta en un Optional
-    public Optional<Veterinario> findEntityById(int idVeterinario) {
-        return this.veterinarioRepository.findById(idVeterinario);
-    }
+   
     
     // Devuelve la entidad Veterinario (se asume que el id existe, de lo contrario se lanzará una excepción)
     public Veterinario findById(int idVeterinario) {
@@ -34,8 +40,11 @@ public class VeterinarioService {
     }
     
     // Crea un nuevo Veterinario
-    public Veterinario create(Veterinario veterinario) {
-        return this.veterinarioRepository.save(veterinario);
+    public Veterinario registerVeterinario(Veterinario veterinario) {
+        veterinario.setPassword(passwordEncoder.encode(veterinario.getPassword()));
+        veterinario.setRole("VETERINARIO");
+        veterinario.setValidado(false);
+        return veterinarioRepository.save(veterinario);
     }
     
     // Actualiza o guarda un Veterinario
@@ -52,4 +61,41 @@ public class VeterinarioService {
         }
         return result;
     }
+    
+    public LoginResponseDTO login(LoginRequestDTO request) {
+        Veterinario vet = veterinarioRepository.findByUsername(request.getUsername());
+        if (vet == null) {
+            throw new RuntimeException("Veterinario no encontrado");
+        }
+
+        if (!passwordEncoder.matches(request.getPassword(), vet.getPassword())) {
+            throw new RuntimeException("Contraseña incorrecta");
+        }
+
+        if (!vet.isValidado()) {
+            throw new RuntimeException("Cuenta no validada");
+        }
+
+        String token = jwtUtils.generateJwtToken(vet);
+
+        return new LoginResponseDTO(vet.getId(), vet.getUsername(), vet.getRole(), token);
+
+    }
+
+    
+    public boolean validarVeterinario(int idVeterinario) {
+        Optional<Veterinario> optionalVeterinario = veterinarioRepository.findById(idVeterinario);
+        if (optionalVeterinario.isPresent()) {
+            Veterinario veterinario = optionalVeterinario.get();
+            veterinario.setValidado(true);
+            veterinarioRepository.save(veterinario);
+            return true;
+        }
+        return false;
+    }
+    public List<Veterinario> findNoValidados() {
+        return veterinarioRepository.findByValidadoFalse();
+    }
+
+
 }

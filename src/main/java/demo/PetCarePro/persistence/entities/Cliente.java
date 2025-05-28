@@ -38,6 +38,15 @@ public class Cliente {
 
     @Column(nullable = false, length = 200) 
     private String direccion;
+    
+    @Column(nullable = false, unique = true)
+    private String username;
+
+    @Column(nullable = false)
+    private String password;
+    
+    @Column(nullable = false)
+    private String role; // Definir su rol
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     @JsonManagedReference

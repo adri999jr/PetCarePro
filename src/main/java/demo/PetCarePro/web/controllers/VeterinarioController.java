@@ -1,10 +1,13 @@
 package demo.PetCarePro.web.controllers;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import demo.PetCarePro.persistence.entities.Veterinario;
 import demo.PetCarePro.services.VeterinarioService;
+import demo.PetCarePro.services.dto.LoginRequestDTO;
+import demo.PetCarePro.services.dto.LoginResponseDTO;
 
 @RestController
 @RequestMapping("/veterinarios")
@@ -24,11 +29,12 @@ public class VeterinarioController {
     private VeterinarioService veterinarioService;
     
     // Endpoint para listar todos los veterinarios
-    @GetMapping
-    public ResponseEntity<List<Veterinario>> list() {
-        List<Veterinario> veterinarios = this.veterinarioService.findAll();
-        return ResponseEntity.ok(veterinarios);
-    }
+	@PreAuthorize("hasRole('ADMIN')")
+	@GetMapping
+	public ResponseEntity<List<Veterinario>> list() {
+	    List<Veterinario> veterinarios = this.veterinarioService.findAll();
+	    return ResponseEntity.ok(veterinarios);
+	}
     
     // Endpoint para obtener un veterinario por su ID
     @GetMapping("/{idVeterinario}")
@@ -41,11 +47,11 @@ public class VeterinarioController {
     }
     
     // Endpoint para crear un nuevo veterinario
-    @PostMapping
-    public ResponseEntity<Veterinario> create(@RequestBody Veterinario veterinario) {
-        Veterinario veterinarioCreado = this.veterinarioService.create(veterinario);
-        return new ResponseEntity<>(veterinarioCreado, HttpStatus.CREATED);
-    }
+//    @PostMapping
+//    public ResponseEntity<Veterinario> create(@RequestBody Veterinario veterinario) {
+//        Veterinario veterinarioCreado = this.veterinarioService.create(veterinario);
+//        return new ResponseEntity<>(veterinarioCreado, HttpStatus.CREATED);
+//    }
     
     // Endpoint para actualizar un veterinario existente. Se verifica que el ID de la URL coincida con el del objeto
     @PutMapping("/{idVeterinario}")
@@ -67,4 +73,37 @@ public class VeterinarioController {
         }
         return ResponseEntity.notFound().build();
     }
+    
+    @PostMapping("/login")
+    @CrossOrigin(origins = "http://localhost:4200")
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO request) {
+        try {
+            LoginResponseDTO response = veterinarioService.login(request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
+    
+    @PutMapping("/validar/{idVeterinario}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> alternarValidacionVeterinario(@PathVariable int idVeterinario) {
+        Optional<Veterinario> optionalVeterinario = Optional.ofNullable(veterinarioService.findById(idVeterinario));
+        if (optionalVeterinario.isPresent()) {
+            Veterinario vet = optionalVeterinario.get();
+            vet.setValidado(!vet.isValidado()); // alterna el valor
+            veterinarioService.save(vet); // guarda el cambio
+            return ResponseEntity.ok().body(Map.of("validado", vet.isValidado()));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/pendientes")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<Veterinario>> listarNoValidados() {
+        return ResponseEntity.ok(veterinarioService.findNoValidados());
+    }
+
+
+
 }

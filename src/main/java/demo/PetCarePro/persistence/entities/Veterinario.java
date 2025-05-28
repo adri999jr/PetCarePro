@@ -34,6 +34,18 @@ public class Veterinario {
 
     @Column(length = 100)
     private String email;
+    
+    @Column(nullable = false, unique = true)
+    private String username;
+
+    @Column(nullable = false)
+    private String password;
+    
+    @Column(nullable = false)
+    private String role;
+    
+    @Column(nullable = false)
+    private boolean validado;
 }
 
 

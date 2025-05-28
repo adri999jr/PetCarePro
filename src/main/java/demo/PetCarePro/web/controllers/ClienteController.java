@@ -3,8 +3,8 @@ package demo.PetCarePro.web.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,9 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 import demo.PetCarePro.persistence.entities.Cliente;
 import demo.PetCarePro.services.ClienteService;
 import demo.PetCarePro.services.dto.ClienteDTO;
+import demo.PetCarePro.services.dto.LoginRequestDTO;
+import demo.PetCarePro.services.dto.LoginResponseDTO;
 
 @RestController
 @RequestMapping("/clientes")
+//@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200")
+
 public class ClienteController {
 
 	@Autowired
@@ -41,10 +46,7 @@ public class ClienteController {
 		return ResponseEntity.ok(cliente);
 	}
 	
-	@PostMapping
-	public ResponseEntity<Cliente> create(@RequestBody Cliente cliente){
-		return new ResponseEntity<Cliente>(this.clienteService.create(cliente), HttpStatus.CREATED);
-	}
+	
 	
 	@PutMapping("/{idCliente}")
 	public ResponseEntity<Cliente> update(@PathVariable int idCliente, @RequestBody Cliente cliente){
@@ -66,5 +68,17 @@ public class ClienteController {
 
 		return ResponseEntity.notFound().build();
 	}
+
+	@PostMapping("/login")
+	@CrossOrigin(origins = "http://localhost:4200")
+	public ResponseEntity<?> login(@RequestBody LoginRequestDTO request) {
+	    try {
+	        LoginResponseDTO response = clienteService.login(request);
+	        return ResponseEntity.ok(response);
+	    } catch (RuntimeException e) {
+	        return ResponseEntity.status(401).body(e.getMessage());
+	    }
+	}
+
 
 }
