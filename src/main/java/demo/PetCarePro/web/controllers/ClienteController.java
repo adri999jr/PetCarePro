@@ -1,6 +1,7 @@
 package demo.PetCarePro.web.controllers;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -78,6 +79,15 @@ public class ClienteController {
 	    } catch (RuntimeException e) {
 	        return ResponseEntity.status(401).body(e.getMessage());
 	    }
+	}
+
+	
+	@GetMapping("/username/{username}")
+	public ResponseEntity<Cliente> getClienteByUsername(@PathVariable String username) {
+	    Optional<Cliente> clienteOpt = clienteService.getClienteByUsername(username);
+	    return clienteOpt
+	        .map(ResponseEntity::ok)
+	        .orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 

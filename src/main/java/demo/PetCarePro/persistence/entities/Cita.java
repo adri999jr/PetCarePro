@@ -9,6 +9,9 @@ import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
+
 import demo.PetCarePro.persistence.enumerados.TipoCita;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -27,7 +30,7 @@ public class Cita {
     private Integer id;
 
     @Column(nullable = false)
-    private String fecha;
+    private LocalDateTime fecha;
 
     @Column(nullable = false, length = 200)
     private String motivo;

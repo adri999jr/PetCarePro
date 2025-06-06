@@ -14,5 +14,6 @@ public class MascotaDTO {
 	    private String especie;
 	    private String raza;
 	    private String fecha_nacimiento;
+	    private String historial_medico;
 	    private Integer id_cliente;
 }

@@ -31,10 +31,10 @@ public class VeterinarioController {
     // Endpoint para listar todos los veterinarios
 	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping
-	public ResponseEntity<List<Veterinario>> list() {
-	    List<Veterinario> veterinarios = this.veterinarioService.findAll();
-	    return ResponseEntity.ok(veterinarios);
-	}
+	public ResponseEntity<List<Veterinario>> getTodosVeterinariosSinAdmin() {
+        List<Veterinario> vets = veterinarioService.obtenerTodosSinAdmins();
+        return ResponseEntity.ok(vets);
+    }
     
     // Endpoint para obtener un veterinario por su ID
     @GetMapping("/{idVeterinario}")
@@ -46,13 +46,7 @@ public class VeterinarioController {
         return ResponseEntity.ok(veterinario);
     }
     
-    // Endpoint para crear un nuevo veterinario
-//    @PostMapping
-//    public ResponseEntity<Veterinario> create(@RequestBody Veterinario veterinario) {
-//        Veterinario veterinarioCreado = this.veterinarioService.create(veterinario);
-//        return new ResponseEntity<>(veterinarioCreado, HttpStatus.CREATED);
-//    }
-    
+ 
     // Endpoint para actualizar un veterinario existente. Se verifica que el ID de la URL coincida con el del objeto
     @PutMapping("/{idVeterinario}")
     public ResponseEntity<Veterinario> update(@PathVariable int idVeterinario, @RequestBody Veterinario veterinario) {
@@ -85,10 +79,10 @@ public class VeterinarioController {
         }
     }
     
-    @PutMapping("/validar/{idVeterinario}")
+    @PutMapping("/validar/{username}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<?> alternarValidacionVeterinario(@PathVariable int idVeterinario) {
-        Optional<Veterinario> optionalVeterinario = Optional.ofNullable(veterinarioService.findById(idVeterinario));
+    public ResponseEntity<?> alternarValidacionVeterinario(@PathVariable String username) {
+        Optional<Veterinario> optionalVeterinario = veterinarioService.getVeterinarioByUsername(username);
         if (optionalVeterinario.isPresent()) {
             Veterinario vet = optionalVeterinario.get();
             vet.setValidado(!vet.isValidado()); // alterna el valor
@@ -98,12 +92,23 @@ public class VeterinarioController {
         return ResponseEntity.notFound().build();
     }
 
+
     @GetMapping("/pendientes")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<Veterinario>> listarNoValidados() {
         return ResponseEntity.ok(veterinarioService.findNoValidados());
     }
+    
 
+    @GetMapping("/username/{username}")
+    public ResponseEntity<Veterinario> getVeterinarioByUsername(@PathVariable String username) {
+        Optional<Veterinario> veterinarioOpt = veterinarioService.getVeterinarioByUsername(username);
+        return veterinarioOpt
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    
 
 
 }

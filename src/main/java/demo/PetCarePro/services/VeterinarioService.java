@@ -61,12 +61,14 @@ public class VeterinarioService {
         }
         return result;
     }
-    
     public LoginResponseDTO login(LoginRequestDTO request) {
-        Veterinario vet = veterinarioRepository.findByUsername(request.getUsername());
-        if (vet == null) {
+        Optional<Veterinario> vetOpt = veterinarioRepository.findByUsername(request.getUsername());
+        
+        if (vetOpt.isEmpty()) {
             throw new RuntimeException("Veterinario no encontrado");
         }
+
+        Veterinario vet = vetOpt.get();
 
         if (!passwordEncoder.matches(request.getPassword(), vet.getPassword())) {
             throw new RuntimeException("Contraseña incorrecta");
@@ -79,12 +81,14 @@ public class VeterinarioService {
         String token = jwtUtils.generateJwtToken(vet);
 
         return new LoginResponseDTO(vet.getId(), vet.getUsername(), vet.getRole(), token);
-
     }
 
+    public Optional<Veterinario> getVeterinarioByUsername(String username) {
+        return veterinarioRepository.findByUsername(username);
+    }
     
-    public boolean validarVeterinario(int idVeterinario) {
-        Optional<Veterinario> optionalVeterinario = veterinarioRepository.findById(idVeterinario);
+    public boolean validarVeterinario(String username) {
+        Optional<Veterinario> optionalVeterinario = veterinarioRepository.findByUsername(username);
         if (optionalVeterinario.isPresent()) {
             Veterinario veterinario = optionalVeterinario.get();
             veterinario.setValidado(true);
@@ -93,9 +97,15 @@ public class VeterinarioService {
         }
         return false;
     }
+
     public List<Veterinario> findNoValidados() {
         return veterinarioRepository.findByValidadoFalse();
     }
+    
+    public List<Veterinario> obtenerTodosSinAdmins() {
+        return veterinarioRepository.findByRoleNot("ADMIN");
+    }
+
 
 
 }

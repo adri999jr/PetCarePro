@@ -38,7 +38,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/veterinarios/login").permitAll()
 
                 // rutas protegidas por rol
+                .requestMatchers(HttpMethod.POST, "/citas/reservar").hasAuthority("CLIENTE")   
+                .requestMatchers(HttpMethod.GET,"/mascotas/cliente").hasAuthority("CLIENTE")
+                .requestMatchers(HttpMethod.GET, "/mascotas").hasAuthority("VETERINARIO")
+                .requestMatchers(HttpMethod.POST, "/mascotas").hasAuthority("VETERINARIO")
                 .requestMatchers(HttpMethod.GET, "/veterinarios").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/veterinarios/pendientes").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/veterinarios/validar/**").hasAuthority("ADMIN")
 
                 .anyRequest().authenticated()

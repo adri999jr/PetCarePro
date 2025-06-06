@@ -62,19 +62,26 @@ public class ClienteService {
 		return result;
 	}
 	public LoginResponseDTO login(LoginRequestDTO request) {
-	    Cliente cliente = clienteRepository.findByUsername(request.getUsername());
-	    if (cliente == null) {
-	        throw new RuntimeException("Cliente no encontrado");
-	    }
-
+	    // Extrae el cliente o lanza una excepción si no se encuentra
+	    Cliente cliente = clienteRepository.findByUsername(request.getUsername())
+	        .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+	    
+	    // Valida la contraseña
 	    if (!passwordEncoder.matches(request.getPassword(), cliente.getPassword())) {
 	        throw new RuntimeException("Contraseña incorrecta");
 	    }
-
+	    
+	    // Genera el token usando el cliente obtenido
 	    String token = jwtUtils.generateJwtTokenFromCliente(cliente);
-
+	    
+	    // Retorna la respuesta de login
 	    return new LoginResponseDTO(cliente.getId(), cliente.getUsername(), cliente.getRole(), token);
 	}
+	
+	  public Optional<Cliente> getClienteByUsername(String username) {
+	        return clienteRepository.findByUsername(username);
+	    }
+
 }
 
 

@@ -10,6 +10,7 @@ public class MascotaMapper {
 	    dto.setNombre(mascota.getNombre());
 	    dto.setEspecie(mascota.getEspecie().name());
 	    dto.setRaza(mascota.getRaza());
+	    dto.setHistorial_medico(mascota.getHistorial_medico());
 	    dto.setFecha_nacimiento(mascota.getFecha_nacimiento());
 
 	    if (mascota.getCliente() != null) {
