@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -38,29 +39,7 @@ public class CitaService {
          .collect(Collectors.toList());
     }
 
-    // 2. Reservar una cita como cliente (método legacy con parámetros individuales)
-    public Cita reservarCita(Integer idMascota, LocalDateTime fecha, String motivo, TipoCita tipoCita) {
-        // Verificar que no esté ocupada
-        boolean ocupada = citaRepository.existsByFecha(fecha);
-        if (ocupada) {
-            throw new IllegalStateException("Esa franja horaria ya está ocupada.");
-        }
-
-        Mascota mascota = mascotaRepository.findById(idMascota)
-            .orElseThrow(() -> new RuntimeException("Mascota no encontrada"));
-
-        Veterinario veterinario = veterinarioRepository.findAleatorio()
-            .orElseThrow(() -> new RuntimeException("No hay veterinarios disponibles"));
-
-        Cita cita = new Cita();
-        cita.setFecha(fecha);
-        cita.setMotivo(motivo);
-        cita.setTipoCita(tipoCita);
-        cita.setMascota(mascota);
-        cita.setVeterinario(veterinario);
-
-        return citaRepository.save(cita);
-    }
+   
 
     public Cita reservarCita(CitaRequestDTO dto) {
         // Convertimos el DTO en una entidad Cita usando el mapper
@@ -109,7 +88,7 @@ public class CitaService {
     }
 
     // 6. Obtener citas por cliente
-    public List<Cita> obtenerCitasCliente(String usernameCliente) {
+    public Optional<List<Cita>> obtenerCitasCliente(String usernameCliente) {
         return citaRepository.findByMascotaClienteUsername(usernameCliente);
     }
 
@@ -144,7 +123,7 @@ public class CitaService {
         return citaRepository.save(cita); // sin restricciones de disponibilidad
     }
     
-    
+   
     
     
     

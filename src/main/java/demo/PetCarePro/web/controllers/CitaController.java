@@ -2,10 +2,12 @@ package demo.PetCarePro.web.controllers;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication; // Import correcto
 import org.springframework.web.bind.annotation.*;
 
 import demo.PetCarePro.persistence.entities.Cita;
@@ -18,6 +20,21 @@ public class CitaController {
 
     @Autowired
     private CitaService citaService;
+
+    @GetMapping("/mis-citas")
+    public ResponseEntity<?> getMisCitas(Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
+        }
+        // Se obtiene el username del usuario autenticado.
+        String username = authentication.getName();
+        Optional<List<Cita>> citas = citaService.obtenerCitasCliente(username);
+
+        if (citas == null || citas.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(citas);
+    }
 
     @GetMapping("/mes")
     public List<Cita> citasDelMes(@RequestParam int year, @RequestParam int month) {
