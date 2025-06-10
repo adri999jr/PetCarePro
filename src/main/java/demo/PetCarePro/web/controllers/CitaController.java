@@ -1,5 +1,6 @@
 package demo.PetCarePro.web.controllers;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -68,4 +69,18 @@ public class CitaController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
+ 
+    @GetMapping("/reservadas")
+    public ResponseEntity<?> getCitasFuturas() {
+        LocalDateTime ahora = LocalDateTime.now();
+        List<Cita> citasFuturas = citaService.obtenerCitasFuturasReservadas(ahora);
+
+        if (citasFuturas.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(citasFuturas);
+    }
+
+    
+
 }

@@ -23,6 +23,9 @@ public interface CitaRepository extends ListCrudRepository<Cita, Integer>{
 	    @Query("SELECT c FROM Cita c WHERE c.veterinario.username = :username")
 	    List<Cita> findByVeterinarioUsername(@Param("username") String username);
 	    
+	    List<Cita> findByFechaAfter(LocalDateTime fecha);
+
+	    
 	    
 	    Optional<List<Cita>> findByMascotaClienteUsername(String username);
 	    

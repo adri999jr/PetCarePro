@@ -39,6 +39,10 @@ public class CitaService {
          .collect(Collectors.toList());
     }
 
+    public List<Cita> obtenerCitasFuturasReservadas(LocalDateTime fechaActual) {
+        return citaRepository.findByFechaAfter(fechaActual);
+    }
+
    
 
     public Cita reservarCita(CitaRequestDTO dto) {
