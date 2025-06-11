@@ -12,7 +12,15 @@ public interface VeterinarioRepository  extends ListCrudRepository<Veterinario, 
 	Optional<Veterinario> findByUsername(String username);
 	List<Veterinario> findByRoleNot(String role);
 	List<Veterinario> findByValidadoFalse();
-	@Query(value = "SELECT * FROM veterinario ORDER BY RAND() LIMIT 1", nativeQuery = true)
+	
+	@Query(value = """
+	        SELECT * 
+	        FROM veterinario 
+	        WHERE role = 'VETERINARIO'
+	          AND validado = true
+	        ORDER BY RAND()
+	        LIMIT 1
+	        """, nativeQuery = true)
 	Optional<Veterinario> findAleatorio();
 
 

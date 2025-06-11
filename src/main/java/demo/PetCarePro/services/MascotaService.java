@@ -33,6 +33,12 @@ public class MascotaService {
         return mascotaRepository.findByClienteUsername(username);
     }
     
+    public Optional<List<Mascota>> buscarPorNombre(String nombre) {
+        return mascotaRepository.findByNombreContainingIgnoreCase(nombre);
+    }
+
+    
+    
     
     
     public boolean existsMascota(int idMascota) {

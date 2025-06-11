@@ -1,5 +1,6 @@
 package demo.PetCarePro.web.controllers;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -89,4 +90,28 @@ public class MascotaController {
              .map(ResponseEntity::ok)
              .orElseGet(() -> ResponseEntity.notFound().build());
     }
+    
+    
+    @PutMapping("/{id}/historial")
+    public ResponseEntity<?> actualizarHistorialMedico(@PathVariable int id, @RequestBody String nuevoHistorial) {
+        Optional<Mascota> mascotaOpt = mascotaService.findEntityById(id);
+        if (mascotaOpt.isPresent()) {
+            Mascota mascota = mascotaOpt.get();
+            mascota.setHistorial_medico(nuevoHistorial);
+            mascotaService.save(mascota);
+            // Devuelve un objeto JSON con un mensaje
+            return ResponseEntity.ok(Collections.singletonMap("mensaje", "Historial actualizado"));
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap("error", "Mascota no encontrada"));
+    }
+
+    
+    @GetMapping("/buscar")
+    public ResponseEntity<List<Mascota>> buscarPorNombre(@RequestParam String nombre) {
+        Optional<List<Mascota>> resultado = mascotaService.buscarPorNombre(nombre);
+        return resultado.map(ResponseEntity::ok)
+                        .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
 }
